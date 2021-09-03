@@ -1,0 +1,19 @@
+create or replace function SUPERVISOR_EMPLEADO(ans varchar)
+returns  table ( empleado_codigo int ,
+	empleado_nombre varchar,
+	emp_EMPLEADO_CODIGO int)
+as $$
+begin
+RETURN query
+	select 
+	  empleado.empleado_codigo,
+	empleado.empleado_nombre,
+	empleado.emp_EMPLEADO_CODIGO
+	 FROM EMPLEADO 
+	  where empleado.EMP_EMPLEADO_CODIGO =ans;
+			 
+end;
+$$
+Language plpgsql;
+
+SELECT * from SUPERVISOR_EMPLEADO(2)

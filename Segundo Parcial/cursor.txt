@@ -1,0 +1,80 @@
+--2do. Parcial, un cursor que muestre por cada sucursal cuanto se ha dado mensualmente en descuentos.
+--opcion 1
+do $$
+declare
+	registro RECORD;
+	Cur_des CURSOR for
+		select
+		sucursal.SUCURSAL_DIRECCION as Sucursal,
+		sum(DETALLE_VENTA.VENTA_DESCUENTO) as Descuento
+		from empresa
+			inner join sucursal on sucursal.RUC_RISE_EMPRESA = EMPRESA.RUC_RISE_EMPRESA
+			inner join empleado on empleado.SUCURSAL_CODIGO = sucursal.SUCURSAL_CODIGO
+			inner join VENTA on venta.EMPLEADO_CODIGO = EMPLEADO.EMPLEADO_CODIGO
+			inner join DETALLE_VENTA ON DETALLE_VENTA.VENTA_ID = VENTA.VENTA_ID
+			group by sucursal.SUCURSAL_DIRECCION;
+begin
+OPEN Cur_des;
+Fetch Cur_des into registro;
+while (found) loop
+raise notice 'Sucursal: % | Descuento total: % '
+,registro.Sucursal, registro.Descuento;
+Fetch Cur_des into registro;
+end loop;
+end $$
+language 'plpgsql';
+
+--opcion 2  
+do $$
+declare
+	registro RECORD;
+	Cur_des CURSOR for
+		select
+		sucursal.SUCURSAL_DIRECCION as Sucursal,
+		extract(month from venta.FECHA_VENTA) as fecha,
+		count (extract( month from venta.FECHA_VENTA )),
+		sum(DETALLE_VENTA.VENTA_DESCUENTO) as Descuento
+		from empresa
+			inner join sucursal on sucursal.RUC_RISE_EMPRESA = EMPRESA.RUC_RISE_EMPRESA
+			inner join empleado on empleado.SUCURSAL_CODIGO = sucursal.SUCURSAL_CODIGO
+			inner join VENTA on venta.EMPLEADO_CODIGO = EMPLEADO.EMPLEADO_CODIGO
+			inner join DETALLE_VENTA ON DETALLE_VENTA.VENTA_ID = VENTA.VENTA_ID
+			group by sucursal.SUCURSAL_DIRECCION, venta.FECHA_VENTA ;
+begin
+OPEN Cur_des;
+Fetch Cur_des into registro;
+while (found) loop
+raise notice 'Sucursal: % | Descuento total: %  | mes: % '
+,registro.Sucursal, registro.Descuento, registro.fecha;
+Fetch Cur_des into registro;
+end loop;
+end $$
+language 'plpgsql';
+
+
+--opcion 3
+do $$
+declare
+	registro RECORD;
+	Cur_des CURSOR for
+		select
+		sucursal.SUCURSAL_DIRECCION as Sucursal,
+		empleado.empleado_nombre as nombre,
+		 venta.FECHA_VENTA as fecha,
+		sum(DETALLE_VENTA.VENTA_DESCUENTO) as Descuento
+		from empresa
+			inner join sucursal on sucursal.RUC_RISE_EMPRESA = EMPRESA.RUC_RISE_EMPRESA
+			inner join empleado on empleado.SUCURSAL_CODIGO = sucursal.SUCURSAL_CODIGO
+			inner join VENTA on venta.EMPLEADO_CODIGO = EMPLEADO.EMPLEADO_CODIGO
+			inner join DETALLE_VENTA ON DETALLE_VENTA.VENTA_ID = VENTA.VENTA_ID
+			group by sucursal.SUCURSAL_DIRECCION, empleado.empleado_nombre, venta.FECHA_VENTA ;
+begin
+OPEN Cur_des;
+Fetch Cur_des into registro;
+while (found) loop
+raise notice 'Sucursal: %  Nombre: %  |  | Descuento total: %  | mes: % '
+,registro.Sucursal, registro.nombre,  registro.Descuento, registro.fecha;
+Fetch Cur_des into registro;
+end loop;
+end $$
+language 'plpgsql';
