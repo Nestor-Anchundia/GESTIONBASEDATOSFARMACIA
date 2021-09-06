@@ -1,16 +1,10 @@
 /*un trigger con el uso de un cursor explicito para incrementar el sueldo de 
 aquellos vendedores que hayan usado el mismo porcentaje de descuento para clientes 
 en más de 3 ocasiones.*/
-SELECT * FROM 
-/*	2do. Parcial, un trigger con el uso de un cursor explicito para incrementar el sueldo 
-de aquellos vendedores que hayan usado el mismo porcentaje de descuento para clientes en más de 3 ocasiones.*/
---FUNCION
-SELECT * FROM EMPLEADO
-		select
+
+	select
 		empleado.empleado_codigo,
 		empleado.empleado_nombre,
-		sucursal.SUCURSAL_DIRECCION as Sucursal,
-		extract(month from venta.FECHA_VENTA) as fecha,
 		count (extract( month from venta.FECHA_VENTA )),
 		sum(DETALLE_VENTA.VENTA_DESCUENTO) as Descuento
 		from empresa
@@ -18,30 +12,31 @@ SELECT * FROM EMPLEADO
 			inner join empleado on empleado.SUCURSAL_CODIGO = sucursal.SUCURSAL_CODIGO
 			inner join VENTA on venta.EMPLEADO_CODIGO = EMPLEADO.EMPLEADO_CODIGO
 			inner join DETALLE_VENTA ON DETALLE_VENTA.VENTA_ID = VENTA.VENTA_ID
-			where empleado.empleado_nombre= 'Marcos Raul'
-			group by sucursal.SUCURSAL_DIRECCION, venta.FECHA_VENTA, empleado.empleado_nombre, empleado.empleado_codigo;
-
-
+			group by venta.FECHA_VENTA, empleado.empleado_nombre, empleado.empleado_codigo;
+ 
+	
+--FUNCION
 create OR REPLACE function actualizar_sueldo ()
 returns trigger as 
 $$
 	begin
-		UPDATE empleado SET empleado_sueldo  = (empleado_sueldo  + 50 )
-		WHERE ID_CURSO = 9;
+		UPDATE empleado SET empleado_sueldo  = (empleado_sueldo + 50)
+		WHERE EMPLEADO_CODIGO = NEW.EMPLEADO_CODIGO;
 		RETURN NULL;
 	end;
 $$
 Language 'plpgsql';
-
 --TRIGGER 
-
 CREATE trigger actualizar_sueldo after insert
 on empleado  for each row
 execute procedure actualizar_sueldo();
 
 --INSERCION
 
-insert into MATRICULA  values('01121', '03', '113', '0113', '8','8','0');
-update MATRICULA set nota_final=(nota_parcial1+nota_pacial2) where id_matricula=01121; 
+insert into EMPLEADO values(10,02,002,2,'Marcos Raul', 'Pico Pico', '2001/06/18', 
+							'2021/04/01','0991912342', 'marcopico@gmail.com',500.90);
 
---VERIFICAR SI AUMENTO EL CURSO 
+--VERIFICAR SI AUMENTO EL sueldo
+
+SELECT empleado_nombre, empleado_sueldo FROM empleado
+
